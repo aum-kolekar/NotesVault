@@ -134,10 +134,6 @@ The application can be configured through environment variables or the `config.p
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 👥 Authors
-
-- Your Name - Initial work
-
 ## 🙏 Acknowledgments
 
 - Flask documentation
