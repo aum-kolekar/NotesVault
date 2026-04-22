@@ -27,8 +27,6 @@ def create_app(config_class=Config):
     app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'uploads')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
     app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'png', 'jpg', 'jpeg'}
-    app.config['CREDITS_PER_UPLOAD'] = 5
-    app.config['CREDITS_TO_VIEW'] = 2
 
     # Ensure upload directory exists
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -43,14 +41,12 @@ def create_app(config_class=Config):
     from app.models.user import User
     from app.models.note import Note
     from app.models.note_view import NoteView
-    from app.models.credit_transaction import CreditTransaction
 
     # Register blueprints
-    from app.routes import main, auth, notes, payment
+    from app.routes import main, auth, notes
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
     app.register_blueprint(notes.bp)
-    app.register_blueprint(payment.bp)
 
     with app.app_context():
         db.create_all()

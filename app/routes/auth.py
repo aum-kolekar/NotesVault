@@ -6,7 +6,6 @@ from app.models.note import Note
 from app.models.note_view import NoteView
 from werkzeug.security import generate_password_hash
 import re
-from app.models.credit_transaction import CreditTransaction
 from datetime import datetime
 from flask import current_app
 
@@ -37,17 +36,15 @@ def register():
             flash('Email already registered.', 'error')
             return render_template('auth/register.html')
 
-        # Create user with unverified status
+        # Create user
         user = User(
             email=email,
             name=name,
             college=college,
             department=department,
             credits=0,  # Start with 0 credits
-            is_verified=False  # Explicitly set as unverified
         )
         user.set_password(password)
-        user.generate_verification_code()  # Generate verification code
         db.session.add(user)
         db.session.commit()
 
@@ -58,12 +55,8 @@ def register():
             description='Initial credits for new user registration'
         )
 
-        # Send verification email
-        from app.utils.email import send_verification_email
-        send_verification_email(user)
-
-        flash('Registration successful! Please check your VIT email for the verification code.', 'success')
-        return redirect(f'/verify-email?email={email}')
+        flash('Registration successful! You can now login.', 'success')
+        return redirect(url_for('auth.login'))
 
     return render_template('auth/register.html')
 
@@ -117,9 +110,18 @@ def resend_verification():
         
         user.generate_verification_code()
         from app.utils.email import send_verification_email
-        send_verification_email(user)
-        
-        flash('New verification code sent. Please check your email.', 'success')
+        email_sent = send_verification_email(user)
+
+        if not email_sent:
+            flash(
+                'Verification code generated but we could not send the email. Please check your email settings or contact support.',
+                'warning'
+            )
+            if current_app.debug:
+                flash(f'Your verification code is: {user.verification_code}', 'info')
+        else:
+            flash('New verification code sent. Please check your email.', 'success')
+
         return redirect(url_for('auth.verify_email'))
     
     return render_template('auth/resend_verification.html')
@@ -149,18 +151,18 @@ def login():
     return render_template('auth/login.html')
 
 @bp.route('/logout')
-@login_required
+
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
 
 @bp.route('/profile')
-@login_required
+
 def profile():
     return render_template('auth/profile.html', Note=Note, NoteView=NoteView)
 
 @bp.route('/profile/edit', methods=['GET', 'POST'])
-@login_required
+
 def edit_profile():
     if request.method == 'POST':
         name = request.form.get('name')
@@ -194,15 +196,15 @@ def edit_profile():
 
     return render_template('auth/edit_profile.html')
 
-@bp.route('/credit-history')
-@login_required
-def credit_history():
-    transactions = CreditTransaction.query.filter_by(user_id=current_user.id).order_by(CreditTransaction.created_at.desc()).all()
-    return render_template('auth/credit_history.html', transactions=transactions)
 
-@bp.route('/gift-credits', methods=['GET', 'POST'])
-@login_required
-def gift_credits():
+
+
+    
+    
+
+
+
+
     if request.method == 'POST':
         recipient_email = request.form.get('recipient_email')
         credit_amount = int(request.form.get('credit_amount'))
@@ -246,7 +248,7 @@ def gift_credits():
     
     return render_template('auth/gift_credits.html')
 
-@bp.route('/buy-credits', methods=['GET', 'POST'])
-@login_required
-def buy_credits():
-    return redirect(url_for('payment.buy_credits'))
+
+
+
+    

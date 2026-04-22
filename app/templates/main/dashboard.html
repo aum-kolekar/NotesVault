@@ -4,19 +4,7 @@
 
 {% block content %}
 <div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card bg-primary text-white h-100">
-            <div class="card-body d-flex flex-column py-3">
-                <h5 class="card-title mb-2">Total Credits</h5>
-                <h2 class="display-5 mb-2">{{ total_credits }}</h2>
-                <p class="card-text mb-0">Available for viewing notes</p>
-                <a href="{{ url_for('auth.credit_history') }}" class="btn btn-light btn-sm mt-2">
-                    <i class="fas fa-history"></i> View History
-                </a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
+    <div class="col-md-6">
         <div class="card bg-success text-white h-100">
             <div class="card-body d-flex flex-column py-3">
                 <h5 class="card-title mb-2">Notes Uploaded</h5>
@@ -25,24 +13,12 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-6">
         <div class="card bg-info text-white h-100">
             <div class="card-body d-flex flex-column py-3">
                 <h5 class="card-title mb-2">Notes Viewed</h5>
                 <h2 class="display-5 mb-2">{{ viewed_notes }}</h2>
                 <p class="card-text mb-0">Total notes accessed</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-warning text-white h-100">
-            <div class="card-body d-flex flex-column py-3">
-                <h5 class="card-title mb-2">Gift Credits</h5>
-                <h2 class="display-5 mb-2"><i class="fas fa-gift"></i></h2>
-                <p class="card-text mb-2">Share with friends</p>
-                <a href="{{ url_for('auth.gift_credits') }}" class="btn btn-light btn-sm">
-                    Gift Credits Now
-                </a>
             </div>
         </div>
     </div>
@@ -78,7 +54,7 @@
                 <div class="text-center py-4">
                     <i class="fas fa-upload fa-3x text-muted mb-3"></i>
                     <h5>No notes uploaded yet</h5>
-                    <p class="text-muted">Start sharing your notes to earn credits</p>
+                    <p class="text-muted">Start sharing your notes</p>
                     <a href="{{ url_for('notes.upload') }}" class="btn btn-primary">Upload Notes</a>
                 </div>
                 {% endif %}
@@ -102,8 +78,7 @@
                         <p class="mb-1 text-muted">
                             <small>
                                 <i class="fas fa-user"></i> {{ view.note.uploader.name }} |
-                                <i class="fas fa-book"></i> {{ view.note.subject }} |
-                                <i class="fas fa-coins"></i> {{ view.credits_spent }} credits
+                                <i class="fas fa-book"></i> {{ view.note.subject }}
                             </small>
                         </p>
                     </a>

@@ -13,7 +13,13 @@ def send_verification_email(user):
         user=user,
         verification_code=user.verification_code
     )
-    mail.send(msg)
+
+    try:
+        mail.send(msg)
+        return True
+    except Exception:
+        current_app.logger.exception('Failed to send verification email')
+        return False
 
 def send_credit_gift_email(recipient, sender, credit_amount):
     msg = Message(
@@ -27,4 +33,10 @@ def send_credit_gift_email(recipient, sender, credit_amount):
         sender=sender,
         credit_amount=credit_amount
     )
-    mail.send(msg) 
+
+    try:
+        mail.send(msg)
+        return True
+    except Exception:
+        current_app.logger.exception('Failed to send credit gift email')
+        return False 

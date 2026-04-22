@@ -12,7 +12,7 @@ NotesVault is a modern web application designed to facilitate academic note shar
 
 ### Note Management
 - Upload notes in PDF and image formats (PNG, JPG, JPEG)
-- Download notes with a credit-based system
+- Download notes
 - Search notes by:
   - Department
   - Semester
@@ -20,12 +20,6 @@ NotesVault is a modern web application designed to facilitate academic note shar
   - Keywords
 - View note details and download history
 - Preview functionality for uploaded notes
-
-### Credit System
-- Earn 5 credits for each note upload
-- Spend 2 credits to download/view a note
-- Track credit transactions
-- View credit history
 
 ### Security
 - Secure file uploads with size restrictions (16MB max)
@@ -127,8 +121,6 @@ The application can be configured through environment variables or the `config.p
 - `UPLOAD_FOLDER`: Directory for uploaded files
 - `MAX_CONTENT_LENGTH`: Maximum file upload size (16MB)
 - `ALLOWED_EXTENSIONS`: Permitted file types
-- `CREDITS_PER_UPLOAD`: Credits earned per upload (5)
-- `CREDITS_TO_VIEW`: Credits required to view a note (2)
 
 ## 🤝 Contributing
 

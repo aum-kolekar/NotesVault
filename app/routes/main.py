@@ -15,7 +15,7 @@ def index():
 def dashboard():
     user_notes = Note.query.filter_by(uploader_id=current_user.id).count()
     viewed_notes = current_user.viewed_notes.count()
-    total_credits = current_user.credits
+    
     
     recent_uploads = Note.query.filter_by(uploader_id=current_user.id)\
         .order_by(Note.upload_date.desc()).limit(5).all()
@@ -26,6 +26,6 @@ def dashboard():
     return render_template('main/dashboard.html',
                          user_notes=user_notes,
                          viewed_notes=viewed_notes,
-                         total_credits=total_credits,
+                         
                          recent_uploads=recent_uploads,
                          recent_views=recent_views) 
