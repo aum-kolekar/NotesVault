@@ -12,13 +12,13 @@ from flask import current_app
 bp = Blueprint('auth', __name__)
 
 def is_valid_college_email(email):
-    return email.endswith('vit.edu')
+    return email.endswith('@vit.edu')
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
-    
+
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -26,105 +26,40 @@ def register():
         college = request.form.get('college')
         department = request.form.get('department')
 
-        # Strictly enforce VIT email
-        if not email.endswith('vit.edu'):
-            flash('Only VIT email addresses are allowed for registration.', 'error')
+        # Validate email
+        if not email.endswith('@vit.edu'):
+            flash('Only VIT email addresses are allowed.', 'error')
             return render_template('auth/register.html')
 
-        # Check if email is already registered
+        # Check existing user
         if User.query.filter_by(email=email).first():
             flash('Email already registered.', 'error')
             return render_template('auth/register.html')
 
-        # Create user
-        user = User(
-            email=email,
-            name=name,
-            college=college,
-            department=department,
-            credits=0,  # Start with 0 credits
-        )
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
+        try:
+            # Create user
+            user = User(
+                email=email,
+                name=name,
+                college=college,
+                department=department
+            )
 
-        # Add initial credits and record the transaction
-        user.add_credits(
-            amount=10,
-            transaction_type='initial',
-            description='Initial credits for new user registration'
-        )
+            user.set_password(password)
 
-        flash('Registration successful! You can now login.', 'success')
-        return redirect(url_for('auth.login'))
+            db.session.add(user)
+            db.session.commit()
+
+            flash('Registration successful! Please login.', 'success')
+            return redirect(url_for('auth.login'))
+
+        except Exception as e:
+            db.session.rollback()
+            print(e)
+            flash('Registration failed.', 'error')
 
     return render_template('auth/register.html')
 
-@bp.route('/verify-email', methods=['GET', 'POST'])
-def verify_email():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
-    
-    email = request.args.get('email')  # Get email from URL parameters
-    if not email:
-        flash('Email address is required for verification.', 'error')
-        return redirect(url_for('auth.login'))
-    
-    if request.method == 'POST':
-        code = request.form.get('verification_code')
-        
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            flash('Email not found.', 'error')
-            return render_template('auth/verify_email.html', email=email)
-        
-        if user.is_verified:
-            flash('Email already verified. Please login.', 'info')
-            return redirect(url_for('auth.login'))
-        
-        if user.verify_email(code):
-            flash('Email verified successfully! Please login.', 'success')
-            return redirect(url_for('auth.login'))
-        else:
-            flash('Invalid or expired verification code.', 'error')
-            return render_template('auth/verify_email.html', email=email)
-    
-    return render_template('auth/verify_email.html', email=email)
-
-@bp.route('/resend-verification', methods=['GET', 'POST'])
-def resend_verification():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
-    
-    if request.method == 'POST':
-        email = request.form.get('email')
-        user = User.query.filter_by(email=email).first()
-        
-        if not user:
-            flash('Email not found.', 'error')
-            return render_template('auth/resend_verification.html')
-        
-        if user.is_verified:
-            flash('Email already verified. Please login.', 'info')
-            return redirect(url_for('auth.login'))
-        
-        user.generate_verification_code()
-        from app.utils.email import send_verification_email
-        email_sent = send_verification_email(user)
-
-        if not email_sent:
-            flash(
-                'Verification code generated but we could not send the email. Please check your email settings or contact support.',
-                'warning'
-            )
-            if current_app.debug:
-                flash(f'Your verification code is: {user.verification_code}', 'info')
-        else:
-            flash('New verification code sent. Please check your email.', 'success')
-
-        return redirect(url_for('auth.verify_email'))
-    
-    return render_template('auth/resend_verification.html')
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -195,60 +130,3 @@ def edit_profile():
         return redirect(url_for('auth.profile'))
 
     return render_template('auth/edit_profile.html')
-
-
-
-
-    
-    
-
-
-
-
-    if request.method == 'POST':
-        recipient_email = request.form.get('recipient_email')
-        credit_amount = int(request.form.get('credit_amount'))
-        
-        # Validate recipient email
-        if not recipient_email.endswith('vit.edu'):
-            flash('Only VIT email addresses are allowed.', 'error')
-            return redirect(url_for('auth.gift_credits'))
-        
-        # Check if recipient exists
-        recipient = User.query.filter_by(email=recipient_email).first()
-        if not recipient:
-            flash('Recipient not found. Please make sure they have registered with NotesVault.', 'error')
-            return redirect(url_for('auth.gift_credits'))
-        
-        # Check if sender has enough credits
-        if current_user.credits < credit_amount:
-            flash('You do not have enough credits to make this gift.', 'error')
-            return redirect(url_for('auth.gift_credits'))
-        
-        # Record transactions for both users
-        current_user.use_credits(
-            credit_amount,
-            'gift_sent',
-            f'Gifted credits to {recipient.name}'
-        )
-        
-        recipient.add_credits(
-            credit_amount,
-            'gift_received',
-            f'Received credits from {current_user.name}',
-            related_user=current_user
-        )
-        
-        # Send email notification to recipient
-        from app.utils.email import send_credit_gift_email
-        send_credit_gift_email(recipient, current_user, credit_amount)
-        
-        flash(f'Successfully gifted {credit_amount} credits to {recipient_email}!', 'success')
-        return redirect(url_for('main.index'))
-    
-    return render_template('auth/gift_credits.html')
-
-
-
-
-    

@@ -45,12 +45,7 @@ def upload():
                 uploader_id=current_user.id
             )
             db.session.add(note)
-            current_user.add_credits(
-                current_app.config['CREDITS_PER_UPLOAD'],
-                'upload',
-                f'Earned credits for uploading note: {note.title}',
-                note=note
-            )
+            db.session.commit()
 
             flash('Note uploaded successfully!', 'success')
             return redirect(url_for('notes.view', note_id=note.id))
@@ -91,20 +86,11 @@ def confirm_view(note_id):
     ).first()
 
     if not existing_view:
-        if not current_user.use_credits(
-            current_app.config['CREDITS_TO_VIEW'],
-            'view',
-            f'Spent credits to view note: {note.title}',
-            note=note
-        ):
-            flash('Insufficient credits to view this note.', 'error')
-            return redirect(url_for('main.index'))
 
         view = NoteView(
             note_id=note_id,
-            viewer_id=current_user.id,
-            credits_spent=current_app.config['CREDITS_TO_VIEW']
-        )
+            viewer_id=current_user.id
+            )
         note.views_count += 1
         db.session.add(view)
         db.session.commit()
