@@ -20,7 +20,12 @@ class Note(db.Model):
     uploader_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Relationships
-    views = db.relationship('NoteView', backref='note', lazy='dynamic')
+    views = db.relationship(
+        'NoteView',
+        backref='note',
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
 
     def __repr__(self):
         return f'<Note {self.id}: {self.title}>' 

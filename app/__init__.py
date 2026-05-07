@@ -25,7 +25,7 @@ def create_app(config_class=Config):
     print("Database URI:", app.config['SQLALCHEMY_DATABASE_URI'])  # Debug print
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'uploads')
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+    app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 16MB max file size
     app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'png', 'jpg', 'jpeg'}
 
     # Ensure upload directory exists

@@ -56,46 +56,25 @@ def upload():
 @login_required
 def view(note_id):
     note = Note.query.get_or_404(note_id)
-    
-    # If user is viewing their own note, show it directly
-    if note.uploader_id == current_user.id:
-        return render_template('notes/view.html', note=note)
-    
-    # For viewing others' notes, check if already viewed
-    existing_view = NoteView.query.filter_by(
-        note_id=note_id,
-        viewer_id=current_user.id
-    ).first()
 
-    if existing_view:
-        return render_template('notes/view.html', note=note)
-    
-    # If not viewed before, show confirmation page
-    credits_to_view = current_app.config['CREDITS_TO_VIEW']
-    return render_template('notes/view_confirm.html', note=note, credits_to_view=credits_to_view)
-
-@bp.route('/view/<int:note_id>/confirm', methods=['POST'])
-@login_required
-def confirm_view(note_id):
-    note = Note.query.get_or_404(note_id)
-    
-    # Check if user has already viewed this note
     existing_view = NoteView.query.filter_by(
-        note_id=note_id,
+        note_id=note.id,
         viewer_id=current_user.id
     ).first()
 
     if not existing_view:
-
         view = NoteView(
-            note_id=note_id,
+            note_id=note.id,
             viewer_id=current_user.id
-            )
+        )
+
         note.views_count += 1
+
         db.session.add(view)
         db.session.commit()
 
-    return redirect(url_for('notes.view', note_id=note_id))
+    return render_template('notes/view.html', note=note)
+
 
 @bp.route('/edit/<int:note_id>', methods=['GET', 'POST'])
 @login_required
@@ -144,22 +123,35 @@ def edit(note_id):
 @login_required
 def delete(note_id):
     note = Note.query.get_or_404(note_id)
-    
-    # Check if user owns the note
+
     if note.uploader_id != current_user.id:
         flash('You do not have permission to delete this note.', 'error')
         return redirect(url_for('notes.view', note_id=note_id))
 
-    # Delete the file
-    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], note.file_path)
-    if os.path.exists(file_path):
-        os.remove(file_path)
+    try:
+        # Delete uploaded file
+        file_path = os.path.join(
+            current_app.config['UPLOAD_FOLDER'],
+            note.file_path
+        )
 
-    # Delete the note
-    db.session.delete(note)
-    db.session.commit()
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
-    flash('Note deleted successfully!', 'success')
+        # Delete related views manually (safe fallback)
+        NoteView.query.filter_by(note_id=note.id).delete()
+
+        # Delete note
+        db.session.delete(note)
+        db.session.commit()
+
+        flash('Note deleted successfully!', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        print("DELETE ERROR:", e)
+        flash('Error deleting note.', 'error')
+
     return redirect(url_for('notes.my_notes'))
 
 @bp.route('/search')

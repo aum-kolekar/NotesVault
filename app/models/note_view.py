@@ -5,7 +5,12 @@ class NoteView(db.Model):
     __tablename__ = 'note_view'
 
     id = db.Column(db.Integer, primary_key=True)
-    note_id = db.Column(db.Integer, db.ForeignKey('notes.id'), nullable=False)
+    note_id = db.Column(
+        db.Integer,
+        db.ForeignKey('notes.id', ondelete='CASCADE'),
+        nullable=False
+    )
+    
     viewer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     view_date = db.Column(db.DateTime, default=datetime.utcnow)
 
