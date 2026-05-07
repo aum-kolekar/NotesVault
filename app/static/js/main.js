@@ -5,12 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                // Check file size (16MB)
-                if (file.size > 16 * 1024 * 1024) {
-                    alert('File size must be less than 16MB');
-                    this.value = '';
-                    return;
-                }
 
                 // Check file type
                 const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
